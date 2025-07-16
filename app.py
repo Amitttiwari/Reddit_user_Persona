@@ -1,4 +1,5 @@
 import gradio as gr
+import os
 from reddit_scraper import init_reddit, extract_username_from_url, fetch_user_content
 from persona_generator import build_prompt, generate_persona
 
@@ -10,6 +11,9 @@ def generate_user_persona(profile_url, model_name):
         posts, comments = fetch_user_content(username, reddit)
         prompt = build_prompt(posts, comments)
         persona_text = generate_persona(prompt, model_name)
+
+          # 💾 Save the persona as .txt
+        save_persona_to_file(username, persona_text)
 
         # Quote from comment
         user_quote = ""
@@ -48,7 +52,6 @@ with gr.Blocks() as demo:
                  outputs=[avatar, username_display, persona_display, quote_display])
 
 def save_persona_to_file(username, persona_text):
-    import os
     os.makedirs("personas", exist_ok=True)
     filepath = os.path.join("personas", f"{username}.txt")
     with open(filepath, "w", encoding="utf-8") as f:

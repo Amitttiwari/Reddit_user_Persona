@@ -11,9 +11,9 @@ def load_generator(model_name):
 
 def build_prompt(posts, comments):
     sample_texts = ""
-    for i, post in enumerate(posts[:5]):
+    for i, post in enumerate(posts[:3]):
         sample_texts += f"[POST {i+1} from r/{post['subreddit']}]: {post['title']} - {post['selftext']}\n"
-    for i, comment in enumerate(comments[:5]):
+    for i, comment in enumerate(comments[:3]):
         sample_texts += f"[COMMENT {i+1} from r/{comment['subreddit']}]: {comment['body']}\n"
 
     prompt = f"""
@@ -53,4 +53,12 @@ Reddit Data:
 def generate_persona(prompt, model_name="openchat/openchat-3.5-1210"):
     generator = load_generator(model_name)
     outputs = generator(prompt, max_new_tokens=500, do_sample=True, temperature=0.7)
-    return outputs[0]['generated_text']
+    raw_output = outputs[0]['generated_text']
+
+     # 🔥 Remove prompt echo from the generated output
+    if "Reddit Data:" in raw_output:
+        persona_only = raw_output.split("Reddit Data:")[0].strip()
+    else:
+        persona_only = raw_output.strip()
+
+    return persona_only
